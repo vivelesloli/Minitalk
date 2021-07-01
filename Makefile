@@ -1,43 +1,36 @@
-NAME_SERVER = server
-NAME_CLIENT = client
+CC		=	gcc
 
-HEADER = minitalk.h
-SRCS_SERVER =  server.c \
-			./utils/print_utils.c \
-			./utils/str_utils.c \
-			./utils/number_utils.c \
+CFLAGS 	= -Wall -Wextra -Werror
+NAME_1	=	server
+NAME_O_SERVER = server.o 
+NAME_SERVER	= server.c
 
-SRCS_CLIENT = client.c \
-			./utils/print_utils.c \
-			./utils/str_utils.c \
-			./utils/number_utils.c \
+NAME_2	=	client
+NAME_O_CLIENT = client.o
+NAME_CLIENT	=	client.c
 
-OBJS_SERVER = $(SRCS_SERVER:.c=.o)
-OBJS_CLIENT = $(SRCS_CLIENT:.c=.o)
+LIBDIR 	=	./libft/
+LIBFT	=	libft.a
 
-CC = gcc
-FLAGS = -g -Wextra -Werror -Wall
-RM = rm -f
+RM		= rm -f
 
-all : $(NAME_SERVER) $(NAME_CLIENT)
- 
-%.o : %.c $(HEADER)
-	$(CC) $(FLAGS) -c $< -o $@
+all:		${NAME_1} ${NAME_2}
 
-$(NAME_SERVER) : $(OBJS_SERVER) $(HEADER)
-		$(CC) $(FLAGS) -o $@ $(OBJS_SERVER)
+${NAME_1}:		${NAME_O_SERVER}
+				make all -C $(LIBDIR)
+				${CC} ${CFLAGS} -o ${NAME_1} ${NAME_O_SERVER}  ${OBJS} $(LIBDIR)/$(LIBFT)
 
-$(NAME_CLIENT) : $(OBJS_CLIENT) $(HEADER)
-		$(CC) $(FLAGS) -o $@ $(OBJS_CLIENT)
+${NAME_2}:		${NAME_O_CLIENT}
+				make all -C $(LIBDIR)
+				${CC} ${CFLAGS} -o ${NAME_2} ${NAME_O_CLIENT} ${OBJS} $(LIBDIR)/$(LIBFT)
+clean:		
+			${RM} ${NAME_O_SERVER} ${NAME_O_CLIENT}
+			make clean -C $(LIBDIR)
 
-clean :
-		$(RM) $(OBJS_SERVER)
-		$(RM) $(OBJS_CLIENT)
+fclean:		clean
+			${RM} ${NAME_1} ${NAME_2} ${NAME_O_SERVER} ${NAME_O_CLIENT}
+			make fclean -C $(LIBDIR)
 
-fclean : clean
-		$(RM) $(NAME_SERVER)
-		$(RM) $(NAME_CLIENT)
+re:			fclean all
 
-re : fclean all
-
-.PHONY : clean fclean re all run
+.PHONY:		all clean fclean re
