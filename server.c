@@ -1,83 +1,67 @@
-#include "minitalk.h"
+#include "./libft/libft.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+#include <string.h>
 
-void	free_elems(char **str, char **pid, char *c, int *is_pid)
+static void	ft_print_pid(void)
 {
-	if (*str)
-	{
-		free(*str);
-		*str = NULL;
-	}
-	if (*pid)
-	{
-		free(*pid);
-		*pid = NULL;
-	}
-	*c = 0;
-	*is_pid = 0;
+	char	*tmp_pid;
+	pid_t	pid;
+
+	pid = getpid();
+	tmp_pid = ft_itoa((int)pid);
+	write(1, "SERVER_PID = ", 13);
+	write(1, tmp_pid, ft_strlen(tmp_pid));
+	write(1, "\n", 1);
 }
 
-void	print_string(char **str, char **pid, char *c, int *is_pid)
+static void	bin_to_char(char *bin)
 {
-	ft_putstr(*str);
-	ft_putchar('\n');
-	if (kill(ft_atoi(*pid), SIGUSR2) == -1)
-		ft_putstr("Error with Kill function");
-	free_elems(str, pid, c, is_pid);
+	char	*start;
+	int		total;
+
+	total = 0;
+	start = bin;
+	while (*start)
+	{
+		total *= 2;
+		if (*start++ == '1')
+			total += 1;
+	}
+	write(1, &total, 1);
 }
 
-void	exec_receive(char **str, char **pid, char *c, int *is_pid)
+static void	ft_get_msg(int signum)
 {
-	if (!*c && *is_pid)
-		print_string(str, pid, c, is_pid);
-	else if (!*c && !*is_pid)
-		*is_pid = 1;
-	else if (*c && !*is_pid)
-	{
-		if (!join_str(str, *c))
-		{
-			ft_putstr("Malloc error\n");
-			free_elems(str, pid, c, is_pid);
-			exit(1);
-		}
-	}
-	else
-	{
-		if (!join_str(pid, *c))
-		{
-			ft_putstr("Malloc error\n");
-			free_elems(str, pid, c, is_pid);
-			exit(1);
-		}
-	}
-}
+	static char	bit[9];
+	int			i;
+	int			binary_nb;
 
-void	receive_char(int signal)
-{
-	static int	i;
-	static int	is_pid;
-	static char	*str;
-	static char	*pid;
-	static char	c;
-
-	if (signal == SIGUSR2)
-		c |= 128 / ft_power(2, i);
-	i++;
-	if (i == 8)
+	binary_nb = 0;
+	i = 0;
+	while (bit[i])
+		i++;
+	if (signum == SIGUSR1)
+		bit[i] = '1';
+	else if (signum == SIGUSR2)
+		bit[i] = '0';
+	bit[i + 1] = '\0';
+	if (i == 7)
 	{
-		i = 0;
-		exec_receive(&str, &pid, &c, &is_pid);
-		c = 0;
+		bin_to_char(bit);
+		bit[0] = '\0';
 	}
 }
 
-int	main(void)
+int	main(int argc, char **argv)
 {
-	ft_putstr("Server PID = ");
-	ft_putnbr(getpid());
-	ft_putstr("\n");
-	signal(SIGUSR1, receive_char);
-	signal(SIGUSR2, receive_char);
+	(void)argc;
+	(void)argv;
+	signal(SIGUSR1, ft_get_msg);
+	signal(SIGUSR2, ft_get_msg);
+	ft_print_pid();
 	while (1)
-		;
+		pause();
 	return (0);
 }
