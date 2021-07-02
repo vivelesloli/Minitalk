@@ -9,8 +9,8 @@ NAME_2	=	client
 NAME_O_CLIENT = client.o
 NAME_CLIENT	=	client.c
 
-LIBDIR 	=	./libft/
-LIBFT	=	libft.a
+LIBDIR 	=	./minilibft/
+LIBFT	=	minilibft.a
 
 RM		= rm -f
 
